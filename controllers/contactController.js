@@ -3,7 +3,16 @@ const getAllContact = (req,res) => {
 }
 
 const createContact = (req,res) => {
-    res.status(200).json({message:"Create contacts"});
+    console.log(req.body);
+    const {name,email,phone} = req.body;
+    if(!name || !email || !phone){
+        res.status(400);
+        throw new Error("All fields are mandatory");
+    }
+    res.status(200).json({
+        message:"Create contacts",
+        backbody:{sendData:req.body},
+    });
 };
 
 const getContact = (req,res) => {
