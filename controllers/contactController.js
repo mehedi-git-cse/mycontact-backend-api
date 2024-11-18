@@ -1,3 +1,6 @@
+const { MongoClient } = require('mongodb');
+const { mongoose } = require('mongoose');
+const contacts = require('../models/contacts');
 
 const asyncHandler = require("express-async-handler");
 /**
@@ -29,20 +32,46 @@ const createContact = asyncHandler(async (req, res, next) => {
             return next(error);
         }
 
-        const newContact = {
-            id: Date.now(),
-            name,
-            email,
-            phone,
-        };
+        const connection = await connectToMongoDB();
+
+        console.log(connection);
+
+        if(!connection){
+            const error = new Error("Database Connection Failed!");
+            res.status(400); 
+            return next(error);
+        }
+
+        const contact = new contacts({
+            name: name,
+            email: email,
+            phone: phone
+        });
+
+        const savedcontacts = await contact.save();
 
         res.status(201).json({
             success: true,
             message: "Contact created successfully.",
-            data: newContact,
+            data: savedcontacts,
         });
+
     } catch (error) {
-        next(error); // Pass the error to the error handler middleware
+        const err = new Error(error.errorResponse.errmsg);
+        res.status(400); 
+        next(err);
+    }
+});
+
+const connectToMongoDB = asyncHandler(async () => {
+    try {
+        const MONGO_URI = process.env.MONGO_URI + '/' + process.env.DB_NAME;
+        await mongoose.connect(MONGO_URI);
+        return true;
+        console.log('Connected to MongoDB!');
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err);
+        return false;
     }
 });
 
