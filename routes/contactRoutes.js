@@ -1,13 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const { getContact,
+
+// Importing contact controller methods
+const {
+    getAllContacts,
     createContact,
-    getAllContact,
+    getContact,
     updateContact,
-    deleteContact
+    deleteContact,
 } = require("../controllers/contactController");
 
-router.route("/").get(getAllContact).post(createContact);
-router.route("/:id").get(getContact).put(updateContact).delete(deleteContact);
+// Routes
+router
+    .route("/")
+    .get(getAllContacts)
+    .post(createContact);
 
+router
+    .route("/:id")
+    .get(getContact)
+    .put(updateContact)
+    .delete(deleteContact);
+
+// Export the router
 module.exports = router;
