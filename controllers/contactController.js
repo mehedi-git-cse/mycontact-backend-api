@@ -1,6 +1,17 @@
 const { MongoClient } = require('mongodb');
 const { mongoose } = require('mongoose');
+//const { createPool } = require('mysql');
+const mysql = require('mysql2/promise');
+const User = require('../models/User');
 const contacts = require('../models/contacts');
+
+// Create a reusable connection pool
+const pool = mysql.createPool({
+    user: process.env.DB_USERNAME,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+});
 
 const asyncHandler = require("express-async-handler");
 /**
@@ -32,9 +43,14 @@ const createContact = asyncHandler(async (req, res, next) => {
             return next(error);
         }
 
-        const connection = await connectToMongoDB();
+        const user = await fetchUsers();
+        if(!user){
+            const error = new Error("Data not found.");
+            res.status(400); 
+            return next(error);
+        }
 
-        console.log(connection);
+        const connection = await connectToMongoDB();
 
         if(!connection){
             const error = new Error("Database Connection Failed!");
@@ -50,10 +66,10 @@ const createContact = asyncHandler(async (req, res, next) => {
 
         const savedcontacts = await contact.save();
 
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Contact created successfully.",
-            data: savedcontacts,
+            data: savedcontacts,user,
         });
 
     } catch (error) {
@@ -62,6 +78,35 @@ const createContact = asyncHandler(async (req, res, next) => {
         next(err);
     }
 });
+
+
+//this is the raw query example method
+
+/*const fetchUsers = async () => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM users');
+        console.log(rows)
+        return rows;
+    } catch (err) {
+        console.error('Database Query Error:', err);
+        return false;
+    }
+};*/
+
+const fetchUsers = async () => {
+    try {
+        const users = await User.findAll({
+            where: {
+                status: 1,
+                is_archived: 0,
+            },
+        });
+        return users;
+    } catch (err) {
+        console.error('Database Query Error:', err);
+        return false;
+    }
+};
 
 const connectToMongoDB = asyncHandler(async () => {
     try {
