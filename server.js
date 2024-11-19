@@ -2,9 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const errorHandler = require("./middleware/errorHandler");
 const connectToMongoDB = require("./config/mongoConnection");
-const app = express();
-
 const PORT = process.env.PORT || 5001;
+const app = express();
 
 app.use(express.json());
 
