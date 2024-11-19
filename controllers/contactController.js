@@ -4,6 +4,7 @@ const { mongoose } = require('mongoose');
 const mysql = require('mysql2/promise');
 const User = require('../models/User');
 const contacts = require('../models/contacts');
+const asyncHandler = require("express-async-handler");
 
 // Create a reusable connection pool
 const pool = mysql.createPool({
@@ -13,17 +14,24 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD,
 });
 
-const asyncHandler = require("express-async-handler");
 /**
  * @desc Get all contacts
  * @route GET /api/contacts
  * @access Public
  */
 const getAllContacts = asyncHandler(async (req, res) => {
+    const getContact = await contacts.find();
+
+    if(!getContact){
+        const error = new Error("Contact not found.");
+        res.status(400); 
+        return next(error);
+    }
+
     res.status(200).json({
         success: true,
         message: "Fetched all contacts successfully.",
-        data: [], // Replace with actual data from database
+        data:getContact,
     });
 });
 
@@ -50,14 +58,6 @@ const createContact = asyncHandler(async (req, res, next) => {
             return next(error);
         }
 
-        const connection = await connectToMongoDB();
-
-        if(!connection){
-            const error = new Error("Database Connection Failed!");
-            res.status(400); 
-            return next(error);
-        }
-
         const contact = new contacts({
             name: name,
             email: email,
@@ -80,7 +80,7 @@ const createContact = asyncHandler(async (req, res, next) => {
 });
 
 
-//this is the raw query example method
+//This is the raw query example method
 
 /*const fetchUsers = async () => {
     try {
@@ -92,7 +92,6 @@ const createContact = asyncHandler(async (req, res, next) => {
         return false;
     }
 };*/
-
 const fetchUsers = async () => {
     try {
         const users = await User.findAll({
@@ -108,17 +107,33 @@ const fetchUsers = async () => {
     }
 };
 
-const connectToMongoDB = asyncHandler(async () => {
+/*async function fetchUsers(){
     try {
-        const MONGO_URI = process.env.MONGO_URI + '/' + process.env.DB_NAME;
-        await mongoose.connect(MONGO_URI);
-        return true;
-        console.log('Connected to MongoDB!');
+        const users = await User.findAll({
+            where: {
+                status: 1,
+                is_archived: 0,
+            },
+        });
+        return users;
     } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
+        console.error('Database Query Error:', err);
         return false;
     }
-});
+}*/
+
+
+// const connectToMongoDB = asyncHandler(async () => {
+//     try {
+//         const MONGO_URI = process.env.MONGO_URI + '/' + process.env.DB_NAME;
+//         await mongoose.connect(MONGO_URI);
+//         console.log('Connected to MongoDB!');
+//         return true;
+//     } catch (err) {
+//         console.error('Error connecting to MongoDB:', err);
+//         return false;
+//     }
+// });
 
 /**
  * @desc Get a single contact by ID
@@ -128,16 +143,9 @@ const connectToMongoDB = asyncHandler(async () => {
 const getContact = asyncHandler(async (req, res, next) => {
     try {
         const { id } = req.params;
-
-        // Simulate fetching contact by ID (replace with DB logic)
-        const contact = {
-            id, // Replace with actual contact data
-            name: "John Doe",
-            email: "johndoe@example.com",
-            phone: "123-456-7890",
-        };
-
-        if (!contact) {
+        const getContactInfo = await contacts.findById(id);
+       
+        if (!getContactInfo) {
             res.status(404);
             throw new Error(`Contact with ID ${id} not found.`);
         }
@@ -145,7 +153,7 @@ const getContact = asyncHandler(async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: "Fetched contact successfully.",
-            data: contact,
+            data: getContactInfo,
         });
     } catch (error) {
         next(error);
@@ -163,12 +171,11 @@ const updateContact = asyncHandler(async (req, res, next) => {
         const { name, email, phone } = req.body;
 
         // Validate required fields
-        if (!name || !email || !phone) {
+        if (!id || !name || !email || !phone) {
             res.status(400);
             throw new Error("All fields (name, email, phone) are mandatory.");
         }
 
-        // Simulate contact update (replace with DB logic)
         const updatedContact = {
             id,
             name,
@@ -176,10 +183,21 @@ const updateContact = asyncHandler(async (req, res, next) => {
             phone,
         };
 
+        const updateContacts = await contacts.findByIdAndUpdate(
+            id,                     // The ID of the document to update
+            updatedContact,         // The updated data
+            { new: true }           // Options: `new: true` returns the updated document
+        );
+        
+        if(!updateContacts){
+            res.status(400);
+            throw new Error("Data not Update.");
+        }
+        
         res.status(200).json({
             success: true,
             message: `Contact with ID ${id} updated successfully.`,
-            data: updatedContact,
+            data: updateContacts,
         });
     } catch (error) {
         next(error);
@@ -195,11 +213,26 @@ const deleteContact = asyncHandler(async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        // Simulate contact deletion (replace with DB logic)
+        const check = await contacts.findById(id);
+        if(!check){
+            res.status(400);
+            throw new Error("Data not exist!");
+        }
+
+        const updateContacts = await contacts.findByIdAndDelete(id);
+
+        console.log(updateContacts);
+
+        if(!updateContacts){
+            res.status(400);
+            throw new Error("Data Not deleted!");
+        }
+            
         res.status(200).json({
             success: true,
             message: `Contact with ID ${id} deleted successfully.`,
         });
+
     } catch (error) {
         next(error);
     }

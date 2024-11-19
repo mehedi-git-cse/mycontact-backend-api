@@ -3,10 +3,9 @@ const { Sequelize } = require('sequelize');
 // Initialize Sequelize with your database credentials
 const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
-    dialect: 'mysql', // or 'mariadb'
+    dialect: 'mysql',
 });
 
-// Test connection
 (async () => {
     try {
         await sequelize.authenticate();

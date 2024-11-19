@@ -25,5 +25,4 @@ const contactSchema = new mongoose.Schema({
 // Create the model
 const contacts = mongoose.model('contacts', contactSchema);
 
-// Export the model for use in other parts of the application
 module.exports = contacts;
