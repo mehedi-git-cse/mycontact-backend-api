@@ -111,18 +111,18 @@ const loginUser = asyncHandler(async (req, res, next) => {
     }
 
     // Hash Password
-    if(userAvailable && await bcrypt.compare(password, userAvailable.password)){
+    if (userAvailable && await bcrypt.compare(password, userAvailable.password)) {
 
       const accessToken = await jwt.sign({
-        user:{
-          name:userAvailable.name,
-          email:userAvailable.email,
-          id:userAvailable.id
+        user: {
+          name: userAvailable.name,
+          email: userAvailable.email,
+          id: userAvailable.id
         },
       },
-      process.env.ACCESS_TOKEN_SECERT,
-      {expiresIn:"30m"}
-    ); 
+        process.env.ACCESS_TOKEN_SECERT,
+        { expiresIn: "30m" }
+      );
 
       res.status(201).json({
         success: true,
@@ -135,7 +135,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
       res.status(401);
       return next(error);
     }
-   
+
   } catch (error) {
     const err = new Error(error.errorResponse.errmsg);
     res.status(400);
