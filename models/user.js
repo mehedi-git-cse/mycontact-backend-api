@@ -1,39 +1,47 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/dbConnection');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/dbConnection");
 
-const User = sequelize.define('User', {
+const User = sequelize.define(
+  "User",
+  {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     phone: {
-        type: DataTypes.BIGINT,
-        allowNull: false,
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
     mongo_id: {
-        type: DataTypes.STRING,
+      type: DataTypes.STRING,
     },
     status: {
-        type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER,
     },
     is_archived: {
-        type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER,
     },
     image: {
-        type: DataTypes.STRING,
+      type: DataTypes.STRING,
     },
-}, {
-    tableName: 'users', // Map explicitly to the users table
+  },
+  {
+    tableName: "users", // Map explicitly to the users table
     timestamps: false, // Disable `createdAt` and `updatedAt` fields
-});
+  }
+);
 
 module.exports = User;
