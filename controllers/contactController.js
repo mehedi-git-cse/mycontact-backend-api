@@ -51,12 +51,12 @@ const createContact = asyncHandler(async (req, res, next) => {
       return next(error);
     }
 
-    const user = await fetchUsers();
+    /*const user = await fetchUsers();
     if (!user) {
       const error = new Error("Data not found.");
       res.status(400);
       return next(error);
-    }
+    }*/
 
     const contact = new contacts({
       name: name,
@@ -70,7 +70,6 @@ const createContact = asyncHandler(async (req, res, next) => {
       success: true,
       message: "Contact created successfully.",
       data: savedcontacts,
-      user,
     });
   } catch (error) {
     const err = new Error(error.errorResponse.errmsg);
@@ -120,18 +119,6 @@ const fetchUsers = async () => {
         return false;
     }
 }*/
-
-/*const connectToMongoDB = asyncHandler(async () => {
-    try {
-        const MONGO_URI = process.env.MONGO_URI + '/' + process.env.DB_NAME;
-        await mongoose.connect(MONGO_URI);
-        console.log('Connected to MongoDB!');
-        return true;
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
-        return false;
-    }
-});*/
 
 /**
  * @desc Get a single contact by ID
