@@ -6,10 +6,14 @@ const {
   getAllUsers,
   getUser,
   updateUser,
+  loginUser,
 } = require("../controllers/userController");
 
-router.route("/").get(getAllUsers);
+const  validateToken = require("../middleware/validateTokenhandler");
+
+router.route("/").get(validateToken, getAllUsers);
 router.route("/register").post(createUser);
+router.route("/login").post(loginUser);
 
 router.route("/:id(\\d+)").get(getUser).put(updateUser);
 

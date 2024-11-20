@@ -1,5 +1,6 @@
 const { mongoose } = require("mongoose");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const asyncHandler = require("express-async-handler");
@@ -10,6 +11,7 @@ const asyncHandler = require("express-async-handler");
  * @access Public
  */
 const getAllUsers = asyncHandler(async (req, res) => {
+  console.log(888);
   const userInfo = await User.findAll();
   if (!userInfo) {
     const error = new Error("No user find!!");
@@ -86,6 +88,61 @@ const createUser = asyncHandler(async (req, res, next) => {
   }
 });
 
+const loginUser = asyncHandler(async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      const error = new Error("All fields ( email, phone) are mandatory.");
+      res.status(400);
+      return next(error);
+    }
+
+    const userAvailable = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (userAvailable.length < 1) {
+      const error = new Error("User Not Found.");
+      res.status(400);
+      return next(error);
+    }
+
+    // Hash Password
+    if(userAvailable && await bcrypt.compare(password, userAvailable.password)){
+
+      const accessToken = await jwt.sign({
+        user:{
+          name:userAvailable.name,
+          email:userAvailable.email,
+          id:userAvailable.id
+        },
+      },
+      process.env.ACCESS_TOKEN_SECERT,
+      {expiresIn:"30m"}
+    ); 
+
+      res.status(201).json({
+        success: true,
+        message: "User Login successfully.",
+        access_token: accessToken,
+      });
+
+    } else {
+      const error = new Error("Email or Passwoprd not valid.");
+      res.status(401);
+      return next(error);
+    }
+   
+  } catch (error) {
+    const err = new Error(error.errorResponse.errmsg);
+    res.status(400);
+    next(err);
+  }
+});
+
 const getUser = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -145,4 +202,5 @@ module.exports = {
   createUser,
   getUser,
   updateUser,
+  loginUser,
 };
