@@ -2,6 +2,7 @@ const { mongoose } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const MongoUser = require("../models/MongoUser");
 
 const asyncHandler = require("express-async-handler");
 
@@ -11,8 +12,7 @@ const asyncHandler = require("express-async-handler");
  * @access Public
  */
 const getAllUsers = asyncHandler(async (req, res) => {
-  console.log(888);
-  const userInfo = await User.findAll();
+  const userInfo = await MongoUser.find();
   if (!userInfo) {
     const error = new Error("No user find!!");
     res.status(400);
@@ -127,7 +127,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
       res.status(201).json({
         success: true,
         message: "User Login successfully.",
-        access_token: accessToken,
+        user_login_token: accessToken,
       });
 
     } else {

@@ -5,6 +5,7 @@ const mysql = require("mysql2/promise");
 const User = require("../models/User");
 const contacts = require("../models/contacts");
 const asyncHandler = require("express-async-handler");
+const axios = require("axios");
 
 // Create a reusable connection pool
 const pool = mysql.createPool({
@@ -128,22 +129,55 @@ const fetchUsers = async () => {
 const getContact = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
-    const getContactInfo = await contacts.findById(id);
+    const getContactFrmOwn = await contacts.findById(id);
 
-    if (!getContactInfo) {
+    if (!getContactFrmOwn) {
       res.status(404);
       throw new Error(`Contact with ID ${id} not found.`);
     }
 
+    let getContactInfoFromAPI = await fetchContact(id);
+   
     res.status(200).json({
       success: true,
       message: "Fetched contact successfully.",
-      data: getContactInfo,
+      data: {
+        getContactFrmOwn,
+        getContactInfoFromAPI: getContactInfoFromAPI?.data ?? '',
+      },
     });
+    
   } catch (error) {
     next(error);
   }
 });
+
+const fetchContact = async (id) => {
+  try {
+    const token = await axios.post(
+      "http://localhost:5002/api/getToken",
+      {
+        clientId: "ABCDEF",
+        password: "123456a@",
+        username: "atik!",
+      },
+    );
+    
+    console.log(333, token.data.access_token);
+
+    const response = await axios.get(`http://localhost:5002/api/contacts/${id}`, {
+      headers: {
+        Authorization: "Bearer "+token.data.access_token,
+      },
+    });
+
+    let Contact= response.data;
+    return Contact;
+
+  } catch (error) {
+    console.error("Error fetching contact:",  error.message);
+  }
+};
 
 /**
  * @desc Update a contact by ID
