@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 
 const connectToMongoDB = asyncHandler(async () => {
   try {
-    const MONGO_URI = process.env.MONGO_URI + "/" + process.env.DB_NAME;
+    const MONGO_URI = process.env.MONGO_DRIVE + "/" + process.env.DB_NAME;
     await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB!");
     return true;
