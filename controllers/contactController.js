@@ -162,8 +162,6 @@ const fetchContact = async (id) => {
         username: "atik!",
       },
     );
-    
-    console.log(333, token.data.access_token);
 
     const response = await axios.get(`http://localhost:5002/api/contacts/${id}`, {
       headers: {

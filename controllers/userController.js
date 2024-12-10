@@ -49,7 +49,6 @@ const createUser = asyncHandler(async (req, res, next) => {
     });
 
     if (userAvailable.length > 0) {
-      console.log("empty");
       const error = new Error("User Already register.");
       res.status(400);
       return next(error);
