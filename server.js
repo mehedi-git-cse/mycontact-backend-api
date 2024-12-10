@@ -2,6 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const errorHandler = require("./middleware/errorHandler");
 const connectToMongoDB = require("./config/mongoConnection");
+const contactRoutes = require("./routes/contactRoutes");
+const userRoutes = require("./routes/userRoutes");
 const PORT = process.env.PORT || 5001;
 const app = express();
 
@@ -17,10 +19,7 @@ app.use(express.json());
 })();
 
 // Routes maping
-const contactRoutes = require("./routes/contactRoutes");
 app.use("/api/contacts", contactRoutes);
-
-const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
 // Catch-all route for undefined routes
