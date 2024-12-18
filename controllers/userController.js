@@ -2,6 +2,7 @@ const { mongoose } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Order = require("../models/order");
 const MongoUser = require("../models/MongoUser");
 
 const asyncHandler = require("express-async-handler");
@@ -196,10 +197,51 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
+
+const createOrder = asyncHandler(async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    
+    const session = await mongoose.startSession(); // Start a session
+    session.startTransaction(); // Start the transaction
+
+    const insertOrders = new Order({
+      name: name,
+      email: email
+    });
+
+    const savedUser = await insertOrders.save({ session });
+
+    if (!savedUser) {
+      const error = new Error("Sorry order not created.");
+      res.status(400);
+      return next(error);
+    }
+
+     // Commit the transaction if all operations succeed
+     await session.commitTransaction();
+     session.endSession();
+
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully.",
+      data: savedUser,
+    });
+  } catch (error) {
+    // Rollback all operations if an error occurs
+    await session.abortTransaction();
+    session.endSession();
+    const err = new Error(error.errorResponse.errmsg);
+    res.status(400);
+    next(err);
+  }
+});
+
 module.exports = {
   getAllUsers,
   createUser,
   getUser,
   updateUser,
   loginUser,
+  createOrder
 };

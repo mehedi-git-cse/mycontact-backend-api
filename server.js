@@ -4,6 +4,7 @@ const errorHandler = require("./middleware/errorHandler");
 const connectToMongoDB = require("./config/mongoConnection");
 const contactRoutes = require("./routes/contactRoutes");
 const userRoutes = require("./routes/userRoutes");
+const userController = require("./controllers/userController");
 const PORT = process.env.PORT || 5001;
 const app = express();
 
@@ -17,6 +18,10 @@ app.use(express.json());
     process.exit(1);
   }
 })();
+
+
+// Normal Route
+app.post("/api/order", userController.createOrder);
 
 // Routes maping
 app.use("/api/contacts", contactRoutes);
