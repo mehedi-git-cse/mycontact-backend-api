@@ -1,7 +1,7 @@
 const { mongoose } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/user");
 const MongoUser = require("../models/MongoUser");
 
 const asyncHandler = require("express-async-handler");
