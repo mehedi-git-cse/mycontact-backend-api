@@ -36,7 +36,6 @@ const createUser = asyncHandler(async (req, res, next) => {
   try {
     const { name, email, phone, status, mongo_id, image, password } = req.body;
 
-    // Validate required fields
     if (!name || !email || !phone) {
       const error = new Error("All fields (name, email, phone) are mandatory.");
       res.status(400);
@@ -197,51 +196,10 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
-
-const createOrder = asyncHandler(async (req, res, next) => {
-  try {
-    const { name, email } = req.body;
-    
-    const session = await mongoose.startSession(); // Start a session
-    session.startTransaction(); // Start the transaction
-
-    const insertOrders = new Order({
-      name: name,
-      email: email
-    });
-
-    const savedUser = await insertOrders.save({ session });
-
-    if (!savedUser) {
-      const error = new Error("Sorry order not created.");
-      res.status(400);
-      return next(error);
-    }
-
-     // Commit the transaction if all operations succeed
-     await session.commitTransaction();
-     session.endSession();
-
-    res.status(201).json({
-      success: true,
-      message: "Order created successfully.",
-      data: savedUser,
-    });
-  } catch (error) {
-    // Rollback all operations if an error occurs
-    await session.abortTransaction();
-    session.endSession();
-    const err = new Error(error.errorResponse.errmsg);
-    res.status(400);
-    next(err);
-  }
-});
-
 module.exports = {
   getAllUsers,
   createUser,
   getUser,
   updateUser,
   loginUser,
-  createOrder
 };

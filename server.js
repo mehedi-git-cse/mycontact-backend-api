@@ -21,7 +21,7 @@ app.use(express.json());
 
 
 // Normal Route
-app.post("/api/order", userController.createOrder);
+//app.post("/api/order", userController.createOrder);
 
 // Routes maping
 app.use("/api/contacts", contactRoutes);
